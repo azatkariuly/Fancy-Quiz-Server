@@ -2,22 +2,24 @@
 
 The new fancy server can manage multiple on-going groups taking different quizzes. In this version, the group admin/creator starts a group and uploads the quiz questions, so the creator is never one of the competitors in its own quiz group. Whenever a new client accesses the server, the server sends a message about the groups currently awaiting members: OPENGROUPS, followed by the list of groups, each consisting of the topic, the group name, the desired group size, and the current size (number of people who have joined so far). This message is terminated by a CRLF. At any time a client is not involved in taking a quiz, the client may request the current list of open groups, by sending the message GETOPENGROUPS. Also, the server may update a client with any changes to the status of the open groups, providing that the client is not currently taking a quiz, using a different message. The UPDGROUP message tells clients about a new or updated group. The server uses it to let clients (who are not currently taking a quiz) know when a new group is added or a group’s current size changes. ENDGROUP is used when a group has ended.
 
-Server sends:                          Client                            answers:
-                                       answers:
+
+Server sends:                          Client answers:                           answers:
+                                       
                                     
-OPENGROUPS|topic|name|size|curr …      nothing                        The group information repeats for all open
-                                                                      groups
+OPENGROUPS|topic|name|size|curr …      nothing                        The group information repeats for all open groups
+                                                                      
 WAIT                                   nothing
 ENDGROUP|groupname                     nothing                        Group is ended naturally or unnaturally, but
                                                                       waiting clients are not dropped
 UPDGROUP|topic|name|size|curr          nothing
 
 
+
 The client may start a new group, or join an existing group, one or the other, not both. To create a group, the client sends the GROUP command, which contains the quiz topic, the group name, and the user’s name. The server will respond with SENDQUIZ, which invites the client to send the quiz file as a stream of questions in exactly the same format as in the previous homework. The client QUIZ message is the type of message where the size precedes the data, and the CRLF terminator is not used. This is so the server can read the data in a loop. The server may answer BAD if the group name is already in use (or any other error occurs). The client may join an existing group with the JOIN message by supplying the group name and the user name. The server responds OK, FULL (group is full), or NOGROUP (group does not exist). The client may LEAVE a group before or during a quiz. After leaving their current group cleanly, the client may join another group, or create one. A group creator may cancel a group, only if the quiz has not started yet. If the quiz has started, it will continue, and the creator can exit the program and it will still continue, but the creator cannot cancel it. The LEAVE command is not allowed for the group creator.
 
-Client sends:                          Server answers                 Notes
-GROUP|topic|groupname|groupsize        QUIZ, NAME or                  After server responds with QUIZ, the
-                                       BAD                            client can send the quiz message
+Client sends:                          Server answers:                Notes:
+GROUP|topic|groupname|groupsize        QUIZ, NAME or BAD              After server responds with QUIZ, the client can send the quiz message
+                                                                
 QUIZ|quizsize|quiztext                 OK or BAD                      This message is not terminated with
                                                                       CRLF – the size gives the needed
                                                                       information
